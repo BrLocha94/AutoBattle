@@ -17,7 +17,6 @@ namespace AutoBattle
             Character EnemyCharacter;
             List<Character> AllPlayers = new List<Character>();
             int currentTurn = 0;
-            int numberOfPossibleTiles = grid.grids.Count;
             
             Setup(); 
 
@@ -137,46 +136,18 @@ namespace AutoBattle
 
             void AlocatePlayers()
             {
-                AlocatePlayerCharacter();
+                AlocateCharacter(PlayerCharacter);
+                AlocateCharacter(EnemyCharacter);
+                grid.DrawBattlefield();
             }
 
-            void AlocatePlayerCharacter()
+            void AlocateCharacter(Character target)
             {
-                int random = 0;
-                GridBox RandomLocation = (grid.grids.ElementAt(random));
-                Console.Write($"{random}\n");
-                
-                if (!RandomLocation.ocupied)
-                {
-                    GridBox PlayerCurrentLocation = RandomLocation;
-                    RandomLocation.ocupied = true;
-                    grid.grids[random] = RandomLocation;
-                    PlayerCharacter.currentBox = grid.grids[random];
-                    AlocateEnemyCharacter();
-                } 
-                else
-                {
-                    AlocatePlayerCharacter();
-                }
-            }
+                GridBox location = grid.GetRandomFreeLocation();
+                Console.Write($"Character location: [{location.xIndex}] [{location.yIndex}]\n");
 
-            void AlocateEnemyCharacter()
-            {
-                int random = 24;
-                GridBox RandomLocation = (grid.grids.ElementAt(random));
-                Console.Write($"{random}\n");
-                
-                if (!RandomLocation.ocupied)
-                {
-                    RandomLocation.ocupied = true;
-                    grid.grids[random] = RandomLocation;
-                    EnemyCharacter.currentBox = grid.grids[random];
-                    grid.drawBattlefield(5 , 5);
-                }
-                else
-                {
-                    AlocateEnemyCharacter();
-                }
+                location.ocupied = true;
+                target.currentBox = location;
             }
         }
     }
