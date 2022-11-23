@@ -6,14 +6,12 @@ namespace AutoBattle
 {
     public class Types
     {
-
         public struct CharacterClassSpecific
         {
             CharacterClass CharacterClass;
             float hpModifier;
             float ClassDamage;
             CharacterSkills[] skills;
-
         }
 
         public struct GridBox
@@ -30,7 +28,6 @@ namespace AutoBattle
                 this.ocupied = ocupied;
                 this.Index = index;
             }
-
         }
 
         public struct CharacterSkills
@@ -47,6 +44,5 @@ namespace AutoBattle
             Cleric = 3,
             Archer = 4
         }
-
     }
 }

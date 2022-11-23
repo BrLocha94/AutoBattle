@@ -34,10 +34,9 @@ namespace AutoBattle
             {
                 for (int j = 0; j < Columns; j++)
                 {
-                    GridBox currentgrid = new GridBox();
+                    GridBox currentgrid = grids[i + j];
                     if (currentgrid.ocupied)
                     {
-                        //if()
                         Console.Write("[X]\t");
                     }
                     else
