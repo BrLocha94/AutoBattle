@@ -4,24 +4,28 @@ using System.Text;
 using System.Linq;
 using static AutoBattle.Types;
 
-namespace AutoBattle
+namespace AutoBattle.Models
 {
     public class Character
     {
         public string Name { get; set; }
-        public float Health;
-        public float BaseDamage;
-        public float DamageMultiplier { get; set; }
+        public float Health { get; protected set; }
+        public float BaseDamage { get; protected set; }
+        public float DamageMultiplier { get; protected set; }
+
         public GridBox currentBox;
         public int PlayerIndex;
-        public Character Target { get; set; } 
-        public Character(CharacterClass characterClass)
-        {
+        public Character Target { get; set; }
+        public CharacterClass CharacterClass { get; private set; }
 
+        public Character(CharacterClass characterClass, float Health, float BaseDamage, int PlayerIndex)
+        {
+            this.Health = Health;
+            this.BaseDamage = BaseDamage;
+            this.PlayerIndex = PlayerIndex;
         }
 
-
-        public bool TakeDamage(float amount)
+        public virtual bool TakeDamage(float amount)
         {
             if((Health -= BaseDamage) <= 0)
             {
@@ -31,7 +35,7 @@ namespace AutoBattle
             return false;
         }
 
-        public void Die()
+        protected virtual void Die()
         {
             //TODO >> maybe kill him?
         }
@@ -120,7 +124,7 @@ namespace AutoBattle
             return false; 
         }
 
-        public void Attack (Character target)
+        public virtual void Attack (Character target)
         {
             var rand = new Random();
             target.TakeDamage(rand.Next(0, (int)BaseDamage));
