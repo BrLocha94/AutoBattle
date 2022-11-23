@@ -17,7 +17,10 @@ namespace AutoBattle
             Character EnemyCharacter;
             List<Character> AllPlayers = new List<Character>();
             int currentTurn = 0;
-            
+
+            const int PlayerIndex = 0;
+            const int EnemyIndex = 1; 
+
             Setup(); 
 
             void Setup()
@@ -57,7 +60,7 @@ namespace AutoBattle
             {
                 CharacterClass characterClass = (CharacterClass)classIndex;
                 Console.WriteLine($"Player Class Choice: {characterClass}");
-                PlayerCharacter = CharacterFactory.CreateCharacter(characterClass, 0);
+                PlayerCharacter = CharacterFactory.CreateCharacter(characterClass, PlayerIndex);
                 
                 CreateEnemyCharacter();
             }
@@ -69,15 +72,13 @@ namespace AutoBattle
                 int randomInteger = rand.Next(1, 4);
                 CharacterClass enemyClass = (CharacterClass)randomInteger;
                 Console.WriteLine($"Enemy Class Choice: {enemyClass}");
-                EnemyCharacter = CharacterFactory.CreateCharacter(enemyClass, 1);
+                EnemyCharacter = CharacterFactory.CreateCharacter(enemyClass, EnemyIndex);
                 StartGame();
             }
 
             void StartGame()
             {
                 //populates the character variables and targets
-                EnemyCharacter.Target = PlayerCharacter;
-                PlayerCharacter.Target = EnemyCharacter;
                 AllPlayers.Add(PlayerCharacter);
                 AllPlayers.Add(EnemyCharacter);
                 AlocatePlayers();
@@ -144,9 +145,9 @@ namespace AutoBattle
             void AlocateCharacter(Character target)
             {
                 GridBox location = grid.GetRandomFreeLocation();
-                Console.Write($"Character location: [{location.xIndex}] [{location.yIndex}]\n");
+                Console.Write($"Character {target.PlayerIndex} location: [{location.xIndex}] [{location.yIndex}]\n");
 
-                location.ocupied = true;
+                location.currentCharacter = target;
                 target.currentBox = location;
             }
         }

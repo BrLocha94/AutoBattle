@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using AutoBattle.Models;
 
 namespace AutoBattle
 {
@@ -8,13 +9,14 @@ namespace AutoBattle
     {
         public int xIndex { get; private set; }
         public int yIndex { get; private set; }
-        public bool ocupied { get; set; }
+        public Character currentCharacter { get; set; } = null;
 
-        public GridBox(int x, int y, bool ocupied)
+        public GridBox(int x, int y)
         {
             xIndex = x;
             yIndex = y;
-            this.ocupied = ocupied;
         }
+
+        public bool IsOcupied => currentCharacter != null;
     }
 }
