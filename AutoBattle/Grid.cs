@@ -41,17 +41,26 @@ namespace AutoBattle
                     GridBox currentgrid = grids[i, j];
 
                     if (currentgrid.IsOcupied)
-                        Console.Write("[X]\t");
+                    {
+                        ConsoleColor color = (ConsoleColor)currentgrid.currentCharacter.PlayerIndex + 1;
+                        Console.ForegroundColor = color;
+                        Console.Write("[X]\t", color);
+                    }
                     else
+                    {
+                        Console.ForegroundColor = ConsoleColor.Gray;
                         Console.Write($"[ ]\t");
+                    }
                 }
 
+                Console.ForegroundColor = ConsoleColor.Gray;
                 Console.Write(Environment.NewLine + Environment.NewLine);
             }
 
+            Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(Environment.NewLine + Environment.NewLine);
         }
-
+        
         public GridBox GetRandomFreeLocation()
         {
             Random rand = new Random();
