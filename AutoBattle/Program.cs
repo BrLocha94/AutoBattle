@@ -13,15 +13,18 @@ namespace AutoBattle
         {
             Grid grid = new Grid(5, 5);
             
-            Character PlayerCharacter;
-            Character EnemyCharacter;
+            Character PlayerCharacter = null;
+            Character EnemyCharacter = null;
+            Character WinnerCharacter = null;
 
             List<Character> AllPlayers = new List<Character>();
             
             int currentTurn = 0;
 
             const int PlayerIndex = 0;
-            const int EnemyIndex = 1; 
+            const int EnemyIndex = 1;
+
+            GameStates currentGameState = GameStates.Starting;
 
             Setup(); 
 
@@ -64,7 +67,8 @@ namespace AutoBattle
                 Console.WriteLine($"Player Class Choice: {characterClass}");
 
                 PlayerCharacter = CharacterFactory.CreateCharacter(characterClass, PlayerIndex);
-                
+                PlayerCharacter.onDieEvent += HandleCharacterDead;
+
                 CreateEnemyCharacter();
             }
 
@@ -75,34 +79,43 @@ namespace AutoBattle
                 Console.WriteLine($"Enemy Class Choice: {enemyClass}");
                 
                 EnemyCharacter = CharacterFactory.CreateCharacter(enemyClass, EnemyIndex);
-                
+                EnemyCharacter.onDieEvent += HandleCharacterDead;
+
                 StartGame();
             }
 
             void StartGame()
             {
-                //populates the character variables and targets
                 AllPlayers.Add(PlayerCharacter);
                 AllPlayers.Add(EnemyCharacter);
+                AllPlayers.ShuffeList();
+
                 AlocatePlayers();
+
+                Console.WriteLine($"\nBATTLE START!!!\n");
+                Console.Write(Environment.NewLine + Environment.NewLine);
+                
+                currentGameState = GameStates.Running;
                 StartTurn();
             }
 
-            void StartTurn(){
-
-                if (currentTurn == 0)
+            void StartTurn()
+            {
+                foreach (Character character in AllPlayers)
                 {
-                    AllPlayers.ShuffeList();
-                    Console.WriteLine($"\nBATTLE START!!!\n");
+                    //Dont need to start next turn if game is over
+                    if (currentGameState != GameStates.Running)
+                        break;
 
-                    Console.WriteLine("Click on any key to start the turn...\n");
-                    Console.Write(Environment.NewLine + Environment.NewLine);
-                    ConsoleKeyInfo key = Console.ReadKey();
+                    //If character is dead dont need to start a turn
+                    if(character.Health > 0)
+                        character.StartTurn(grid);
                 }
 
-                foreach(Character character in AllPlayers)
+                if (currentGameState == GameStates.GameOver)
                 {
-                    character.StartTurn(grid);
+                    FinishGame();
+                    return;
                 }
 
                 currentTurn++;
@@ -111,39 +124,22 @@ namespace AutoBattle
 
             void HandleTurn()
             {
-                if(PlayerCharacter.Health == 0)
-                {
-                    Console.Write(Environment.NewLine + Environment.NewLine);
+                Console.Write(Environment.NewLine + Environment.NewLine);
+                Console.WriteLine("Click on any key to start the next turn...\n");
+                Console.Write(Environment.NewLine + Environment.NewLine);
 
-                    Console.Write($"Game over: Player {PlayerCharacter.PlayerIndex} died\n");
+                ConsoleKeyInfo key = Console.ReadKey();
+                StartTurn();
+            }
 
-                    Console.Write(Environment.NewLine + Environment.NewLine);
+            void FinishGame()
+            {
+                Console.Write(Environment.NewLine + Environment.NewLine);
+                Console.Write($"Battle finished: Character {WinnerCharacter.PlayerIndex} won the battle\n");
+                Console.Write(Environment.NewLine + Environment.NewLine);
+                Console.WriteLine("Click on any key to close game...\n");
 
-                    Console.WriteLine("Click on any key to close game...\n");
-                    ConsoleKeyInfo key = Console.ReadKey();
-                    return;
-                } 
-                else if (EnemyCharacter.Health == 0)
-                {
-                    Console.Write(Environment.NewLine + Environment.NewLine);
-
-                    Console.Write($"Game clear: Enemy {PlayerCharacter.PlayerIndex} died\n");
-
-                    Console.Write(Environment.NewLine + Environment.NewLine);
-
-                    Console.WriteLine("Click on any key to close game...\n");
-                    ConsoleKeyInfo key = Console.ReadKey();
-                    return;
-                } 
-                else
-                {
-                    Console.Write(Environment.NewLine + Environment.NewLine);
-                    Console.WriteLine("Click on any key to start the next turn...\n");
-                    Console.Write(Environment.NewLine + Environment.NewLine);
-
-                    ConsoleKeyInfo key = Console.ReadKey();
-                    StartTurn();
-                }
+                ConsoleKeyInfo key = Console.ReadKey();
             }
 
             void AlocatePlayers()
@@ -159,6 +155,32 @@ namespace AutoBattle
                 Console.Write($"Character {target.PlayerIndex} location: [{location.xIndex}] [{location.yIndex}]\n");
 
                 target.SetCurrentBox(location);
+            }
+
+            void HandleCharacterDead(Character target)
+            {
+                //Unregister event to avoid null pointer error
+                target.onDieEvent -= HandleCharacterDead;
+
+                Character winner = null;
+
+                foreach(Character character in AllPlayers)
+                {
+                    if(character.Health > 0)
+                    {
+                        if (winner == null)
+                        {
+                            winner = character;
+                            continue;
+                        }
+
+                        return;
+                    }
+                }
+
+                // Only 1 character is alive
+                WinnerCharacter = winner;
+                currentGameState = GameStates.GameOver;
             }
         }
     }

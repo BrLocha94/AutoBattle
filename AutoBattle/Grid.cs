@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using AutoBattle.Utils;
+using static AutoBattle.Types;
 
 namespace AutoBattle
 {
@@ -97,7 +98,7 @@ namespace AutoBattle
             return true;
         }
 
-        private GridBox CheckBox(int xIndex, int yIndex, int characterIndex)
+        private GridBox CheckBoxForTarget(int xIndex, int yIndex, int characterIndex)
         {
             if (CheckBounds(xIndex, yIndex))
             {
@@ -112,24 +113,64 @@ namespace AutoBattle
             return null;
         }
 
+        private GridBox CheckBox(int xIndex, int yIndex)
+        {
+            if (CheckBounds(xIndex, yIndex))
+            {
+                GridBox targetBox = grids[xIndex, yIndex];
+
+                if (!targetBox.IsOcupied) return targetBox;
+            }
+
+            return null;
+        }
+
+        public GridBox GetFreeLocation(GridBox origin, Directions direction)
+        {
+            GridBox targetBox;
+
+            if (direction == Directions.Left)
+            {
+                targetBox = CheckBox(origin.xIndex - 1, origin.yIndex);
+                if (targetBox != null) return targetBox;
+            }
+            else if (direction == Directions.Right)
+            {
+                targetBox = CheckBox(origin.xIndex + 1, origin.yIndex);
+                if (targetBox != null) return targetBox;
+            }
+            else if (direction == Directions.Up)
+            {
+                targetBox = CheckBox(origin.xIndex, origin.yIndex - 1);
+                if (targetBox != null) return targetBox;
+            }
+            else if (direction == Directions.Down)
+            {
+                targetBox = CheckBox(origin.xIndex, origin.yIndex + 1);
+                if (targetBox != null) return targetBox;
+            }
+
+            return null;
+        }
+
         public GridBox CheckTargetsOnRange(GridBox origin, int characterIndex)
         {
             GridBox targetBox;
 
             //Left
-            targetBox = CheckBox(origin.xIndex - 1, origin.yIndex, characterIndex);
+            targetBox = CheckBoxForTarget(origin.xIndex - 1, origin.yIndex, characterIndex);
             if (targetBox != null) return targetBox;
 
             //Right
-            targetBox = CheckBox(origin.xIndex + 1, origin.yIndex, characterIndex);
+            targetBox = CheckBoxForTarget(origin.xIndex + 1, origin.yIndex, characterIndex);
             if (targetBox != null) return targetBox;
 
             //Up
-            targetBox = CheckBox(origin.xIndex, origin.yIndex - 1, characterIndex);
+            targetBox = CheckBoxForTarget(origin.xIndex, origin.yIndex - 1, characterIndex);
             if (targetBox != null) return targetBox;
 
             //Down
-            targetBox = CheckBox(origin.xIndex, origin.yIndex + 1, characterIndex);
+            targetBox = CheckBoxForTarget(origin.xIndex, origin.yIndex + 1, characterIndex);
             if (targetBox != null) return targetBox;
 
             return null;

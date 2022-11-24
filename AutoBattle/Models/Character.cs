@@ -45,12 +45,32 @@ namespace AutoBattle.Models
                 return;
             }
 
-            //TODO: Push Away
             return;
+        }
+
+        public virtual void PushAway(Grid battlefield, Directions direction)
+        {
+            GridBox gridBox = battlefield.GetFreeLocation(currentBox, direction);
+
+            if(gridBox != null)
+            {
+                Console.Write($"Character {PlayerIndex} pushed away to {gridBox.xIndex} {gridBox.yIndex}\n");
+                SetCurrentBox(gridBox);
+                battlefield.DrawBattlefield();
+            }
         }
 
         protected virtual void Die()
         {
+            Console.Write($"Character {PlayerIndex} died\n");
+
+            //Clear player from battlefield
+            if (currentBox != null)
+            {
+                currentBox.currentCharacter = null;
+                currentBox = null;
+            }
+
             onDieEvent?.Invoke(this);
         }
 
@@ -74,18 +94,44 @@ namespace AutoBattle.Models
 
             if (targetBox != null) 
             {
-                Attack(targetBox.currentCharacter);
-                return;
+                Character target = targetBox.currentCharacter;
+
+                Attack(target);
+
+                if (target.Health <= 0) return;
+
+                // Try to push away
+                int random = Utilities.GetRandomInt(0, 100);
+
+                if (random < 90)
+                {
+                    Directions direction = Directions.Null;
+
+                    if (currentBox.xIndex < target.currentBox.xIndex)
+                        direction = Directions.Right;
+                    
+                    else if (currentBox.xIndex > target.currentBox.xIndex)
+                        direction = Directions.Left;
+                    
+                    else if (currentBox.yIndex < target.currentBox.yIndex)
+                        direction = Directions.Down;
+                    
+                    else if (currentBox.yIndex > target.currentBox.yIndex)
+                        direction = Directions.Up;
+
+                    target.PushAway(battlefield, direction);
+                    return;
+                }
             }
             // if there is no target close enough, calculates in wich direction this character should move to be closer to a possible target
             else
             {
                 targetBox = battlefield.FindTarget(currentBox, PlayerIndex);
-                Console.WriteLine($"Finded target for character {PlayerIndex} on {currentBox.xIndex} {currentBox.yIndex}\n");
 
                 if (targetBox == null)
                 {
                     //TODO: ACTIONS WHEN THERE IS NO TARGET
+                    Console.WriteLine($"There are no targets for character {PlayerIndex} on {currentBox.xIndex} {currentBox.yIndex}\n");
                     return;
                 }
 
