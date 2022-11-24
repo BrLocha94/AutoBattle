@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using AutoBattle.Utils;
 
 namespace AutoBattle
 {
@@ -63,8 +64,6 @@ namespace AutoBattle
         
         public GridBox GetRandomFreeLocation()
         {
-            Random rand = new Random();
-
             int randomLocationX = 0;
             int randomLocationY = 0;
 
@@ -72,8 +71,8 @@ namespace AutoBattle
 
             while (!isFree)
             {
-                randomLocationX = rand.Next(0, xLength);
-                randomLocationY = rand.Next(0, yLength);
+                randomLocationX = Utilities.GetRandomInt(0, xLength);
+                randomLocationY = Utilities.GetRandomInt(0, yLength);
 
                 if(!grids[randomLocationX, randomLocationY].IsOcupied)
                     isFree = true;
@@ -89,7 +88,7 @@ namespace AutoBattle
             return grids[xIndex, yIndex];
         }
 
-        public bool CheckBounds(int xIndex, int yIndex)
+        private bool CheckBounds(int xIndex, int yIndex)
         {
             if (xIndex < 0 || xIndex >= xLength) return false;
 

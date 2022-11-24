@@ -3,40 +3,69 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using static AutoBattle.Types;
+using AutoBattle.Utils;
 
 namespace AutoBattle.Models
 {
     public class Character
     {
+        public Action<Character> onDieEvent;
+
         public string Name { get; set; }
+        
         public float Health { get; protected set; }
         public float BaseDamage { get; protected set; }
         public float DamageMultiplier { get; protected set; }
+        public CharacterClass CharacterClass { get; protected set; }
 
-        public GridBox currentBox;
-        public int PlayerIndex;
-        public CharacterClass CharacterClass { get; private set; }
+        public GridBox currentBox { get; private set; }
+        public int PlayerIndex { get; private set; }
 
-        public Character(CharacterClass characterClass, float Health, float BaseDamage, int PlayerIndex)
+        public Character(float Health, float BaseDamage, int PlayerIndex)
         {
             this.Health = Health;
             this.BaseDamage = BaseDamage;
             this.PlayerIndex = PlayerIndex;
         }
 
-        public virtual bool TakeDamage(float amount)
+        public void SetCurrentBox(GridBox nextBox)
         {
-            if((Health -= BaseDamage) <= 0)
+            if (currentBox != null)
+                currentBox.currentCharacter = null;
+
+            currentBox = nextBox;
+            currentBox.currentCharacter = this;
+        }
+
+        public virtual void TakeDamage(float amount)
+        {
+            if ((Health -= BaseDamage) <= 0)
             {
                 Die();
-                return true;
+                return;
             }
-            return false;
+
+            //TODO: Push Away
+            return;
         }
 
         protected virtual void Die()
         {
-            //TODO >> maybe kill him?
+            onDieEvent?.Invoke(this);
+        }
+
+        protected virtual void MoveTo(GridBox nextBox)
+        {
+            SetCurrentBox(nextBox);
+            Console.WriteLine($"Player {PlayerIndex} walked to {currentBox.xIndex} {currentBox.yIndex}\n");
+        }
+
+        protected virtual void Attack(Character target)
+        {
+            int damage = Utilities.GetRandomInt(0, (int)BaseDamage);
+            Console.WriteLine($"Player {PlayerIndex} is attacking the player {target.PlayerIndex} and did {BaseDamage} damage\n");
+            
+            target.TakeDamage(damage);
         }
 
         public void StartTurn(Grid battlefield)
@@ -69,10 +98,7 @@ namespace AutoBattle.Models
 
                     if(nextBox != null && !nextBox.IsOcupied)
                     {
-                        currentBox.currentCharacter = null;
-                        currentBox = nextBox;
-                        currentBox.currentCharacter = this;
-                        Console.WriteLine($"Player {PlayerIndex} walked left to {currentBox.xIndex} {currentBox.yIndex}\n");
+                        MoveTo(nextBox);
                         battlefield.DrawBattlefield();
                         return;
                     }
@@ -84,10 +110,7 @@ namespace AutoBattle.Models
 
                     if (nextBox != null && !nextBox.IsOcupied)
                     {
-                        currentBox.currentCharacter = null;
-                        currentBox = nextBox;
-                        currentBox.currentCharacter = this;
-                        Console.WriteLine($"Player {PlayerIndex} walked right to {currentBox.xIndex} {currentBox.yIndex}\n");
+                        MoveTo(nextBox);
                         battlefield.DrawBattlefield();
                         return;
                     }
@@ -100,10 +123,7 @@ namespace AutoBattle.Models
 
                     if (nextBox != null && !nextBox.IsOcupied)
                     {
-                        currentBox.currentCharacter = null;
-                        currentBox = nextBox;
-                        currentBox.currentCharacter = this;
-                        Console.WriteLine($"Player {PlayerIndex} walked up to {currentBox.xIndex} {currentBox.yIndex}\n");
+                        MoveTo(nextBox);
                         battlefield.DrawBattlefield();
                         return;
                     }
@@ -115,24 +135,15 @@ namespace AutoBattle.Models
 
                     if (nextBox != null && !nextBox.IsOcupied)
                     {
-                        currentBox.currentCharacter = null;
-                        currentBox = nextBox;
-                        currentBox.currentCharacter = this;
-                        Console.WriteLine($"Player {PlayerIndex} walked down to {currentBox.xIndex} {currentBox.yIndex}\n");
+                        MoveTo(nextBox);
                         battlefield.DrawBattlefield();
                         return;
                     }
                 }
 
                 Console.WriteLine($"Player {PlayerIndex} has nowhere to move\n");
+                return;
             }
-        }
-
-        public virtual void Attack (Character target)
-        {
-            var rand = new Random();
-            target.TakeDamage(rand.Next(0, (int)BaseDamage));
-            Console.WriteLine($"Player {PlayerIndex} is attacking the player {target.PlayerIndex} and did {BaseDamage} damage\n");
         }
     }
 }

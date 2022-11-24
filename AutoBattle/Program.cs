@@ -15,7 +15,9 @@ namespace AutoBattle
             
             Character PlayerCharacter;
             Character EnemyCharacter;
+
             List<Character> AllPlayers = new List<Character>();
+            
             int currentTurn = 0;
 
             const int PlayerIndex = 0;
@@ -33,7 +35,7 @@ namespace AutoBattle
                 //asks for the player to choose between for possible classes via console.
                 Console.WriteLine("Choose Between One of this Classes:\n");
                 Console.WriteLine("[1] Paladin, [2] Warrior, [3] Cleric, [4] Archer");
-                //store the player choice in a variable
+                
                 string choice = Console.ReadLine();
 
                 switch (choice)
@@ -60,6 +62,7 @@ namespace AutoBattle
             {
                 CharacterClass characterClass = (CharacterClass)classIndex;
                 Console.WriteLine($"Player Class Choice: {characterClass}");
+
                 PlayerCharacter = CharacterFactory.CreateCharacter(characterClass, PlayerIndex);
                 
                 CreateEnemyCharacter();
@@ -68,11 +71,11 @@ namespace AutoBattle
             void CreateEnemyCharacter()
             {
                 //randomly choose the enemy class and set up vital variables
-                var rand = new Random();
-                int randomInteger = rand.Next(1, 4);
-                CharacterClass enemyClass = (CharacterClass)randomInteger;
+                CharacterClass enemyClass = (CharacterClass)Utilities.GetRandomInt(1, 4);
                 Console.WriteLine($"Enemy Class Choice: {enemyClass}");
+                
                 EnemyCharacter = CharacterFactory.CreateCharacter(enemyClass, EnemyIndex);
+                
                 StartGame();
             }
 
@@ -89,7 +92,12 @@ namespace AutoBattle
 
                 if (currentTurn == 0)
                 {
-                    //AllPlayers.Sort();  
+                    AllPlayers.ShuffeList();
+                    Console.WriteLine($"\nBATTLE START!!!\n");
+
+                    Console.WriteLine("Click on any key to start the turn...\n");
+                    Console.Write(Environment.NewLine + Environment.NewLine);
+                    ConsoleKeyInfo key = Console.ReadKey();
                 }
 
                 foreach(Character character in AllPlayers)
@@ -105,16 +113,26 @@ namespace AutoBattle
             {
                 if(PlayerCharacter.Health == 0)
                 {
+                    Console.Write(Environment.NewLine + Environment.NewLine);
+
+                    Console.Write($"Game over: Player {PlayerCharacter.PlayerIndex} died\n");
+
+                    Console.Write(Environment.NewLine + Environment.NewLine);
+
+                    Console.WriteLine("Click on any key to close game...\n");
+                    ConsoleKeyInfo key = Console.ReadKey();
                     return;
                 } 
                 else if (EnemyCharacter.Health == 0)
                 {
                     Console.Write(Environment.NewLine + Environment.NewLine);
 
-                    // endgame?
+                    Console.Write($"Game clear: Enemy {PlayerCharacter.PlayerIndex} died\n");
 
                     Console.Write(Environment.NewLine + Environment.NewLine);
 
+                    Console.WriteLine("Click on any key to close game...\n");
+                    ConsoleKeyInfo key = Console.ReadKey();
                     return;
                 } 
                 else
@@ -126,13 +144,6 @@ namespace AutoBattle
                     ConsoleKeyInfo key = Console.ReadKey();
                     StartTurn();
                 }
-            }
-
-            int GetRandomInt(int min, int max)
-            {
-                var rand = new Random();
-                int index = rand.Next(min, max);
-                return index;
             }
 
             void AlocatePlayers()
@@ -147,8 +158,7 @@ namespace AutoBattle
                 GridBox location = grid.GetRandomFreeLocation();
                 Console.Write($"Character {target.PlayerIndex} location: [{location.xIndex}] [{location.yIndex}]\n");
 
-                location.currentCharacter = target;
-                target.currentBox = location;
+                target.SetCurrentBox(location);
             }
         }
     }
